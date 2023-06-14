@@ -22,11 +22,10 @@ function extractFacilitiesData_() {
     ['name', 1],
     ['deptCode', 3],
     ['deptName', 4],
-    ['prefectureCode', 7],
-    ['prefectureName', 8],
-    ['responsiblePerson', 9],
-    ['j_sanka', 10],
-    ['irb', 17],
+    ['prefectureName', 7],
+    ['responsiblePerson', 10],
+    ['j_sanka', 11],
+    ['irb', 18],
   ]);
 
   /** @type {Map<string, number>} */
@@ -38,7 +37,6 @@ function extractFacilitiesData_() {
   const inputSpreadsheet = SpreadsheetApp.openById(inputSpreadsheetId);
   const facilitiesSheet = inputSpreadsheet.getSheetByName('施設一覧');
   const facilitiesSheetValues = facilitiesSheet.getDataRange().getValues();
-
   /** @type {Array<Array<*>>} */
   const extractedData = facilitiesSheetValues.map(row =>
     Array.from(columnIndexes).map(([_, index]) => row[index])
@@ -48,16 +46,46 @@ function extractFacilitiesData_() {
       idx === 0 ||
       (row[indexes.get('j_sanka')] === '1' && row[indexes.get('irb')] === '1')
   );
-  // If there are multiple departments in the same facility, the one with the lowest department code is output.
   const removeDuplicateRecords = removeDuplicateRecords_(filteredData, indexes);
   const removeNewlinesFromFilteredData = removeNewlinesFromFilteredData_(
     removeDuplicateRecords
   );
-  const sortFilteredDataWithPrefecture = sortArray_(
+  indexes.set('prefectureCode', indexes.size);
+  const prefectureDataArray = getPrefecturesInOrder_(
     removeNewlinesFromFilteredData,
+    inputSpreadsheet,
+    indexes
+  );
+  const sortFilteredDataWithPrefecture = sortArray_(
+    prefectureDataArray,
     indexes
   );
   return [sortFilteredDataWithPrefecture, indexes];
+}
+/**
+ * Retrieves the prefectures in order and appends the prefecture code to the two-dimensional array.
+ *
+ * @param {Array<Array<string>>} arr - The input two-dimensional array.
+ * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} inputSpreadsheet - The input spreadsheet.
+ * @param {Map<string, number>} indexes - The map containing column indexes.
+ * @returns {Array<Array<string|number>>} - The modified two-dimensional array with prefecture codes appended.
+ */
+function getPrefecturesInOrder_(arr, inputSpreadsheet, indexes) {
+  const prefectureSheet = inputSpreadsheet
+    .getSheetByName('JPLSG_SV2 MST_県')
+    .getDataRange()
+    .getValues()
+    .map((x, idx) => {
+      const code = idx === 0 ? '県コード' : idx;
+      return [x[0], code];
+    });
+  const prefectureMap = new Map(prefectureSheet);
+  return arr.map(x => {
+    const code = prefectureMap.has(x[indexes.get('prefectureName')])
+      ? prefectureMap.get(x[indexes.get('prefectureName')])
+      : -1;
+    return [...x, code];
+  });
 }
 
 /**
