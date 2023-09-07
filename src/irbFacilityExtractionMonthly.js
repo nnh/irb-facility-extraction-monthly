@@ -113,9 +113,7 @@ function sortArray_(arr, indexes) {
 function createOutputText_(row, indexes) {
   return `        <TR><TD>${row[indexes.get('prefectureName')]}</TD><TD>${
     row[indexes.get('name')]
-  }</TD><TD>${row[indexes.get('deptName')]}</TD><TD>${
-    row[indexes.get('responsiblePerson')]
-  }</TD></TR>\n`;
+  }</TD><TD>${row[indexes.get('responsiblePerson')]}</TD></TR>\n`;
 }
 
 /**
