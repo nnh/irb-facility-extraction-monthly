@@ -23,9 +23,9 @@ function extractFacilitiesData_() {
     ['deptCode', 3],
     ['deptName', 4],
     ['prefectureName', 7],
-    ['responsiblePerson', 10],
+    ['responsiblePerson', 18],
     ['j_sanka', 11],
-    ['irb', 18],
+    ['irb', 19],
   ]);
 
   /** @type {Map<string, number>} */
